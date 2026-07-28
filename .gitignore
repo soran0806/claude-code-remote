@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.ehpk
+*.log
+stt/venv/
+__pycache__/
+*.pyc
+
+# 録音・文字起こしの実データ。個人情報そのものなので絶対に公開しない。
+recordings/
+*.wav
+
+# アプリと無関係な個人用の録音ツール
+rec.py
+transcribe.py
+
+# 個人用の自動化スクリプト。接続情報や自宅環境がべた書きなので公開しない。
+nudge.ps1
+nudge-at.ps1
+icloud.py
+kuroko-monitor-qr.png
+
+# 接続情報の実体は ~/.even-terminal/kuroko.env（リポジトリ外）。

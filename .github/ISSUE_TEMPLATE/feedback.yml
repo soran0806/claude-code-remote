@@ -1,0 +1,38 @@
+name: Feedback / Request  (ご意見・ご要望 / 意见与建议)
+description: Report a bug or request a feature. 不具合報告・機能要望はこちら。
+labels: ["feedback"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type / 種類 / 类型
+      options:
+        - Bug / 不具合 / 故障
+        - Feature request / 要望 / 功能建议
+        - Question / 質問 / 提问
+    validations:
+      required: true
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: What happened? / 何が起きた？ / 发生了什么？
+      description: Any language is fine - Japanese, English or Chinese. 日本語・英語・中国語どれでもOK。
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version / アプリのバージョン / 应用版本
+      placeholder: "0.3.0"
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Setup / 環境 / 环境
+      description: How do you reach your PC? (Tailscale / tunnel / LAN), OS, Even app version.
+      placeholder: |
+        PC: Windows 11
+        Reachable via: Tailscale
+        Even app: 2.x

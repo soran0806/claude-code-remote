@@ -1,0 +1,27 @@
+{
+  "package_id": "com.soran.kurokomonitor",
+  "edition": "202601",
+  "name": "Claude Code Remote",
+  "version": "0.3.0",
+  "min_app_version": "2.0.0",
+  "min_sdk_version": "0.0.12",
+  "tagline": "グラスからPCのClaude Codeを監視・操作",
+  "description": "スマホを取り出さずに、グラスだけで自分のPCのClaude Codeを見張って操作できます。セッション一覧、応答の全文表示、権限の承認・拒否、音声での返信に対応。自分のPCで動いているClaude Codeにトンネル経由で接続して使います（接続先URLとトークンは初回起動時にスマホ画面で入力）。音声返信を使わない場合は音声サーバーの設定は不要です。なお本アプリは個人が開発した非公式ツールであり、Anthropic社とは関係ありません。",
+  "author": "soran",
+  "entrypoint": "index.html",
+  "permissions": [
+    { "name": "g2-microphone", "desc": "音声で返信を吹き込むためにグラスのマイクを使用します。音声返信を使わない場合は許可不要です。" },
+    {
+      "name": "network",
+      "desc": "利用者が指定した自分のPCへ、トンネル経由で接続します。セッション状態の取得と返信の送信にのみ使用します。",
+      "whitelist": [
+        "https://ts.net",
+        "https://trycloudflare.com",
+        "https://ngrok-free.app",
+        "https://ngrok.app",
+        "https://loca.lt"
+      ]
+    }
+  ],
+  "supported_languages": ["ja", "en", "zh"]
+}
