@@ -239,13 +239,45 @@ async function refreshSession() {
     if (!perm && mode === 'approve') {
       notice = t.permExpired
       // 自動ジャンプで来とった場合は一覧に帰る（テストセッションに居座らない）
-      if (jumpedFromList) { jumpedFromList = false; mode = 'list'; current = null; refreshList().catch(() => {}); return }
+      if (jumpedFromList) { jumpedFromList = false; mode = 'list'; current = null; saveResume(); refreshList().catch(() => {}); return }
       mode = 'view'
     }
   } catch (err: any) {
     lastError = String(err?.message ?? err)
   }
   render()
+}
+
+// ── ロック復帰対策 ──
+// AndroidではバックグラウンドでWebViewごと破棄されることがあり、復帰は実質コールドスタートに
+// なる（iOSは維持される）。開いとったセッションと読んどった位置だけ残して復元する。
+// ponytail: 残すのは2つだけ。録音中/確認中は復帰しても音声が消えとるので保存しない
+const RESUME_KEY = 'kuroko_resume'
+
+function saveResume(): void {
+  const v = mode === 'view' && current ? JSON.stringify({ id: current.id, topLine }) : ''
+  bridge.setLocalStorage(RESUME_KEY, v).catch(() => {})
+}
+
+/** 復元できたら true。セッションが消えとったら false を返して通常起動に任せる */
+async function restoreResume(): Promise<boolean> {
+  const raw = await bridge.getLocalStorage(RESUME_KEY).catch(() => '')
+  if (!raw) return false
+  try {
+    const saved = JSON.parse(raw) as { id: string; topLine: number }
+    sessions = await listSessions(MAX_ROWS)
+    const s = sessions.find(x => x.id === saved.id)
+    if (!s) return false
+    await openSession(s)
+    const maxTop = Math.max(0, lines.length - MAX_ROWS)
+    topLine = Math.min(saved.topLine, maxTop)
+    scrollTarget = topLine
+    followTail = topLine >= maxTop
+    render()
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function openSession(s: Session) {
@@ -256,6 +288,7 @@ async function openSession(s: Session) {
   lines = [t.loading]
   topLine = 0
   render()
+  saveResume()
   await refreshSession()
 }
 
@@ -341,7 +374,7 @@ function onTap() {
     return
   }
   if (mode === 'menu') {
-    if (menuChoice === 0) { mode = 'list'; current = null; refreshList().catch(() => {}) }
+    if (menuChoice === 0) { mode = 'list'; current = null; saveResume(); refreshList().catch(() => {}) }
     else { mode = 'view'; render() }
     return
   }
@@ -422,6 +455,7 @@ function startGlide() {
       gliding = false
       followTail = topLine >= Math.max(0, lines.length - MAX_ROWS)
       render()
+      saveResume()
       return
     }
     const diff = scrollTarget - topLine
@@ -495,7 +529,16 @@ const unsubscribe = bridge.onEvenHubEvent(event => {
   // ライフサイクル系(4-7)を先に処理してから0(CLICK)判定する。
   // 空エンベロープがCLICK扱いになる誤爆を順序で防ぐ。
   if (sysType === OsEventTypeList.SYSTEM_EXIT_EVENT || sysType === OsEventTypeList.ABNORMAL_EXIT_EVENT) { cleanup(); return }
-  if (sysType === OsEventTypeList.FOREGROUND_ENTER_EVENT || sysType === OsEventTypeList.FOREGROUND_EXIT_EVENT) return
+  if (sysType === OsEventTypeList.FOREGROUND_ENTER_EVENT) {
+    // 復帰直後は表示が古い。次のポーリングを待たずに取り直す
+    if (settingsReady) (mode === 'list' ? refreshList() : refreshSession()).catch(() => {})
+    return
+  }
+  if (sysType === OsEventTypeList.FOREGROUND_EXIT_EVENT) {
+    // Androidはこの後プロセスごと消える可能性がある。最後に位置を焼いておく
+    saveResume()
+    return
+  }
   if (sysType === OsEventTypeList.DOUBLE_CLICK_EVENT || textType === OsEventTypeList.DOUBLE_CLICK_EVENT) {
     onDoubleTap()
     return
@@ -544,7 +587,9 @@ function mirrorCompanion(b: string, f: string) {
 // 初回ロード。未設定ならスマホ画面にフォームを出し、保存されたら通常起動に切り替える
 if (settingsReady) {
   mountMirrorUI()
-  refreshList().catch(() => {})
+  restoreResume()
+    .then(ok => { if (!ok) return refreshList() })
+    .catch(() => refreshList().catch(() => {}))
 } else {
   mountOnboardingForm(bridge, () => {
     settingsReady = true
