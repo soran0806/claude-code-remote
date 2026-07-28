@@ -10,6 +10,9 @@ __pycache__/
 recordings/
 *.wav
 
+# シミュレータのスクショ置き場（作業中に散らかる）
+*.png
+
 # アプリと無関係な個人用の録音ツール
 rec.py
 transcribe.py

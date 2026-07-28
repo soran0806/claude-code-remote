@@ -46,13 +46,19 @@ export class Recorder {
 
 /** PCのターミナルで開いとるclaudeセッションにキー入力として直接注入（フォーク回避）。
  *  ターミナル駆動セッションかどうかの判定はサーバ側（JSONLのentrypoint）でやる */
+/** 注入は無理やが /api/prompt に流すとフォークする、という状態。呼び出し側は諦めること */
+export class ForkRisk extends Error {}
+
 export async function injectTerminal(sessionId: string, cwd: string, text: string): Promise<void> {
   const res = await fetch(`${cfg.sttBase}/inject`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId, cwd, text }),
   })
-  if (!res.ok) throw new Error(`inject ${res.status}`)
+  if (res.ok) return
+  const body = await res.json().catch(() => ({} as any))
+  if (body?.fork_risk) throw new ForkRisk(body.error ?? `inject ${res.status}`)
+  throw new Error(`inject ${res.status}`)
 }
 
 export async function transcribe(pcm: Uint8Array, signal: AbortSignal): Promise<string> {

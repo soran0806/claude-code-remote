@@ -58,6 +58,9 @@ interface Strings {
   save: string
   errRequired: string
   errScheme: string
+  tryDemo: string
+  tryDemoNote: string
+  sendBlocked: string
   helpTitle: string
   helpBody: string
   feedback: string
@@ -111,6 +114,9 @@ const ja: Strings = {
   save: '保存して起動',
   errRequired: '接続先URLとトークンは必須です',
   errScheme: 'URLは https:// で始めてください（http:// は開発用サイドロード時のみ有効）',
+  sendBlocked: '送信できず（ターミナル複数）',
+  tryDemo: 'まずデモを試す',
+  tryDemoNote: '接続先が無くても、偽のデータで全画面を操作できます。設定はあとから変更できます。',
   helpTitle: 'うまく繋がらないとき',
   helpBody: 'アプリが接続できるのは Tailscale / Cloudflare / ngrok / localtunnel のURLだけです。自宅LANのIPアドレスや http:// のURLはブロックされます。',
   feedback: '不具合の報告・要望',
@@ -163,6 +169,9 @@ const en: Strings = {
   save: 'Save and start',
   errRequired: 'Server URL and token are required',
   errScheme: 'The URL must start with https:// (http:// only works in a sideloaded dev build)',
+  sendBlocked: 'Not sent - multiple terminals',
+  tryDemo: 'Try the demo first',
+  tryDemoNote: 'Explore every screen with sample data, no server needed. You can change this later.',
   helpTitle: 'If it will not connect',
   helpBody: 'Only Tailscale, Cloudflare, ngrok and localtunnel URLs can be reached. Local LAN addresses and plain http:// URLs are blocked.',
   feedback: 'Report a bug / request a feature',
@@ -215,6 +224,9 @@ const zh: Strings = {
   save: '保存并启动',
   errRequired: '服务器网址和令牌为必填项',
   errScheme: '网址必须以 https:// 开头（http:// 仅在开发侧载版本中有效）',
+  sendBlocked: '发送失败：终端有多个',
+  tryDemo: '先试用演示',
+  tryDemoNote: '无需服务器，用示例数据体验全部界面。之后可以随时修改设置。',
   helpTitle: '如果连不上',
   helpBody: '只能访问 Tailscale、Cloudflare、ngrok、localtunnel 的网址。局域网 IP 和 http:// 网址会被拦截。',
   feedback: '报告问题 / 功能建议',

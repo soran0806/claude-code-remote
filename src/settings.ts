@@ -1,5 +1,6 @@
 import { cfg } from './config'
 import { t, LINK_FEEDBACK, LINK_DONATE } from './i18n'
+import { DEMO_BASE } from './demo'
 
 // Evenアプリのローカルストレージに保存する接続設定。初回起動時にスマホ画面（コンパニオン
 // WebView）でフォーム入力させ、以後は自動で読み込む。グラス側にはトークン等を一切出さない。
@@ -14,6 +15,15 @@ interface Bridge {
 }
 
 export async function loadSettings(bridge: Bridge): Promise<boolean> {
+  // ponytail: シミュレータの自動操作APIはグラスのタッチパッドしか送れず、スマホ画面の
+  // ボタンは押せない。スクショ撮影を自動化するため、起動URLの ?demo でデモに入れる。
+  // 保存はしないので、通常のインストールには何の影響もない。
+  if (new URLSearchParams(location.search).has('demo')) {
+    cfg.apiBase = DEMO_BASE
+    cfg.token = DEMO_BASE
+    cfg.sttBase = ''
+    return true
+  }
   const values = await Promise.all(KEYS.map(k => bridge.getLocalStorage(`kuroko_${k}`).catch(() => '')))
   KEYS.forEach((k, i) => { cfg[k] = values[i] || '' })
   return REQUIRED.every(k => cfg[k])
@@ -74,6 +84,10 @@ export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
               background:#8AE68A;color:#111;font-weight:600;font-size:15px;">${t.save}</button>
       <p id="s-err" style="color:#e68a8a;font-size:13px;margin-top:10px;min-height:1em;"></p>
 
+      <button id="s-demo" style="width:100%;padding:11px;border-radius:8px;background:transparent;
+              border:1px solid #3E3E3E;color:#E5E5E5;font-size:14px;">${t.tryDemo}</button>
+      <div style="${S.note}margin-bottom:20px;">${t.tryDemoNote}</div>
+
       <div style="${S.card}">
         <div style="font-weight:600;margin-bottom:6px;">${t.helpTitle}</div>
         <div style="color:#c9c9c9;font-size:13px;">${t.helpBody}</div>
@@ -101,5 +115,10 @@ export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
     }
     err.textContent = ''
     saveSettings(bridge, { apiBase, token, sttBase }).then(onDone)
+  })
+
+  // サーバを持っていない人がそのまま全画面を触れるようにする（審査員もここを通る）
+  document.getElementById('s-demo')!.addEventListener('click', () => {
+    saveSettings(bridge, { apiBase: DEMO_BASE, token: DEMO_BASE, sttBase: '' }).then(onDone)
   })
 }

@@ -5,16 +5,16 @@ import {
   TextContainerUpgrade,
   OsEventTypeList,
 } from '@evenrealities/even_hub_sdk'
-import { getAdvW } from '@evenrealities/pretext'
 import { wrapLines, separator } from './wrap'
 import {
   Session, PermissionRequest,
   listSessions, fetchHistory, fetchPendingPermission, respondPermission, sendPrompt,
 } from './api'
 import { POLL_MS, MAX_RECORD_MS } from './config'
-import { normalizePcm, Recorder, transcribe, injectTerminal } from './voice'
+import { normalizePcm, Recorder, transcribe, injectTerminal, ForkRisk } from './voice'
 import { loadSettings, mountOnboardingForm, renderOnboardingGlasses, voiceEnabled } from './settings'
 import { t, LINK_FEEDBACK, LINK_DONATE } from './i18n'
+import { glyph, STATUS_ICON } from './glyphs'
 
 // ── レイアウト ──
 // [本文 552px][スクロールバー 24px] / 下段: [凡例 400px][状態 176px]
@@ -54,12 +54,11 @@ const recorder = new Recorder()
 // 思考中表示: 動く演出が苦手というフィードバックにより静止表示に固定（2026-07-23）
 
 // スクロールバー用グリフ（フォント非対応なら代替文字）
-const BAR_THUMB = getAdvW('█'.codePointAt(0)!) > 0 ? '█' : '#'
-const BAR_TRACK = getAdvW('│'.codePointAt(0)!) > 0 ? '│' : '|'
+const BAR_THUMB = glyph('█', '#')
+const BAR_TRACK = glyph('│', '|')
 const APPROVE_LABELS = [t.approve, t.approveAlways, t.deny]
 const MENU_LABELS = [t.backToList, t.cancel]
 const CONFIRM_LABELS = [t.send, t.retake, t.quit]
-const STATUS_ICON: Record<string, string> = { busy: '▶', idle: '・', awaiting: '⚠' }
 
 const bridge = await waitForEvenAppBridge()
 // 接続先/トークンは配布物に埋め込まず、Evenアプリのローカルストレージから読む。
@@ -107,7 +106,8 @@ function listBody(): string {
 
 function approveBody(): string {
   const p = pending
-  const head = p ? `⚠ ${t.awaiting}: ${p.toolName}\n${p.description.slice(0, 60)}\n${p.detail.slice(0, 80)}` : `⚠ ${t.awaiting}`
+  const mark = STATUS_ICON.awaiting
+  const head = p ? `${mark} ${t.awaiting}: ${p.toolName}\n${p.description.slice(0, 60)}\n${p.detail.slice(0, 80)}` : `${mark} ${t.awaiting}`
   const menu = APPROVE_LABELS.map((l, i) => `${i === approveChoice ? '>' : ' '} ${l}`).join('\n')
   return `${head}\n\n${menu}`
 }
@@ -323,8 +323,11 @@ async function deliver(s: Session, text: string): Promise<void> {
   try {
     await injectTerminal(s.id, s.cwd, `${t.voicePrefix} ${text}`)
     return
-  } catch {
-    // ターミナル対象外・ターミナル無し/複数 → 通常送信へ
+  } catch (err) {
+    // 対象が稼働中の本物のターミナルセッションなら、/api/prompt はフォーク復元になる。
+    // 返事が別セッションに付いてターミナルにも出ん＝黙って壊れるので、ここで止める。
+    if (err instanceof ForkRisk) throw err
+    // それ以外（ターミナル駆動でない/古いセッション）は普通の続きになるので通常送信へ
   }
   const newId = await sendPrompt(s.id, t.voicePrefix + '\n' + text, s.cwd)
   if (newId && newId !== s.id && current) current = { ...current, id: newId }
@@ -358,7 +361,11 @@ function onTap() {
         // 少し待ってから状態確認する（そうしないと次の定期ポーリングまで「考え中」が出ない）
         .then(() => new Promise(resolve => setTimeout(resolve, 1500)))
         .then(() => refreshSession())
-        .catch(err => { lastError = String(err?.message ?? err); render() })
+        .catch(err => {
+          if (err instanceof ForkRisk) notice = t.sendBlocked
+          else lastError = String(err?.message ?? err)
+          render()
+        })
     } else if (confirmChoice === 1) {
       startRecording().catch(err => { lastError = String(err?.message ?? err); mode = 'view'; render() })
     } else {

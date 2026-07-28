@@ -165,8 +165,15 @@ def inject():
     #                新セッションIDを自分で追跡する作りなので、ここで200を返すと追跡が壊れる
     auto = not sid
 
-    def give_up(why, code=409):
-        return prompt_fallback(text, cwd, why) if auto else (jsonify({"error": why}), code)
+    # fork_risk=True は「対象が今動いとる本物のターミナルセッション」やのに注入できんかった場合。
+    # ここでグラス側が /api/prompt にフォールバックすると、稼働中セッションへの送信＝
+    # フォーク復元になり、返事が別セッションIDに付いてターミナルにも出ん。黙って壊れるより
+    # エラーを見せる方がマシなので、クライアントにフォールバック禁止を伝える。
+    def give_up(why, code=409, fork_risk=False):
+        if auto:
+            # 点呼由来。sessionId無しの新規セッションに流すのでフォークにはならない
+            return prompt_fallback(text, cwd, why)
+        return (jsonify({"error": why, "fork_risk": fork_risk}), code)
 
     if auto:
         cwd = cwd or DEFAULT_CWD
@@ -192,7 +199,7 @@ def inject():
     pids = find_claude_pids()
     # ponytail: ターミナル1個前提。複数開いたらどれか特定できんので拒否（必要になったらpid指定APIに拡張）
     if len(pids) != 1:
-        return give_up(f"claude terminal count = {len(pids)}")
+        return give_up(f"claude terminal count = {len(pids)}", fork_risk=True)
     import time
     t0 = time.time() - 2      # ファイル時刻の誤差ぶん少し前から見る
     r = subprocess.run(
@@ -200,13 +207,13 @@ def inject():
         input=text.encode("utf-8"), capture_output=True, timeout=15,
     )
     if r.returncode != 0:
-        return give_up(r.stderr.decode("utf-8", errors="replace"), 500)
+        return give_up(r.stderr.decode("utf-8", errors="replace"), 500, fork_risk=True)
     # 注入が成功しても着弾したとは限らん。ターミナルが選択UI（承認プロンプト・質問・
     # スラッシュコマンド補完）を出しとると、キー入力がそっちに食われてEnterが
     # 選択の決定に消える＝プロンプトにならん。無言で消えるのが一番タチ悪いので実際に確認する。
     if landed(proj, t0, text):
         return jsonify({"ok": True, "pid": pids[0], "via": "inject"})
-    return give_up("注入したがJSONLに現れず（選択UIに食われた可能性）")
+    return give_up("注入したがJSONLに現れず（選択UIに食われた可能性）", fork_risk=True)
 
 
 def landed(proj, t0, text, timeout=10.0):
