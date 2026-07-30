@@ -69,14 +69,14 @@ export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
 
       <label style="${S.label}">${t.fieldApi}
         <input id="s-api" inputmode="url" autocapitalize="off" autocorrect="off"
-               placeholder="https://your-pc.tail1234.ts.net" style="${S.input}">
+               placeholder="your-pc.tail1234.ts.net（https://から入力）" style="${S.input}">
       </label>
       <label style="${S.label}">${t.fieldToken}
         <input id="s-token" autocapitalize="off" autocorrect="off" style="${S.input}">
       </label>
       <label style="${S.label}">${t.fieldStt} <span style="color:#919191;">(${t.optional})</span>
         <input id="s-stt" inputmode="url" autocapitalize="off" autocorrect="off"
-               placeholder="https://your-pc-stt.tail1234.ts.net" style="${S.input}">
+               placeholder="your-pc-stt.tail1234.ts.net（https://から入力）" style="${S.input}">
         <div style="${S.note}">${t.fieldSttNote}</div>
       </label>
 

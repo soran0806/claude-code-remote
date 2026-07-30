@@ -2,7 +2,7 @@
   "package_id": "com.soran.kurokomonitor",
   "edition": "202601",
   "name": "Claude Code Remote",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "min_app_version": "2.0.0",
   "min_sdk_version": "0.0.12",
   "entrypoint": "index.html",
@@ -10,13 +10,15 @@
     { "name": "g2-microphone", "desc": "音声で返信を吹き込むためにグラスのマイクを使用します。音声返信を使わない場合は許可不要です。" },
     {
       "name": "network",
-      "desc": "利用者が指定した自分のPCへ、トンネル経由で接続します。セッション状態の取得と返信の送信にのみ使用します。",
+      "desc": "利用者が指定した自分のPCへ、トンネル経由で接続します。セッション状態の取得と返信の送信に使用します。設定画面の寄付リンク（Ko-fi）と要望フォーム（GitHub）はブラウザで開く外部リンクです。",
       "whitelist": [
         "https://ts.net",
         "https://trycloudflare.com",
         "https://ngrok-free.app",
         "https://ngrok.app",
-        "https://loca.lt"
+        "https://loca.lt",
+        "https://ko-fi.com",
+        "https://github.com"
       ]
     }
   ],

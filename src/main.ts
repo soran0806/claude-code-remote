@@ -48,6 +48,7 @@ let menuChoice = 0
 let confirmChoice = 0
 let transcriptText = ''
 let transcribing = false
+let micReady = false  // audioControl(true)が返るまでマイクは実際には拾えん
 let transcribeAbort: AbortController | null = null
 const recorder = new Recorder()
 
@@ -119,6 +120,9 @@ function menuBody(): string {
 }
 
 function recordBody(): string {
+  // マイクが立ち上がる前に「録音中」と出すと、その間に喋った分が丸ごと落ちる。
+  // 起動が終わるまでは別の文言にして、切り替わりを「喋ってええ」の合図にする。
+  if (!micReady) return t.micWarmup
   return `${t.recording(Math.floor(recorder.seconds()))}\n\n${t.tapWhenDone}`
 }
 
@@ -303,12 +307,18 @@ const timer = setInterval(() => {
 async function startRecording() {
   recorder.clear()
   transcriptText = ''
+  micReady = false
   mode = 'record'
-  render()
+  render()                       // タップの手応えは即返す（「マイク起動中…」）
   await bridge.audioControl(true)
+  if (mode !== 'record') return  // 起動待ちの間に中止された
+  recorder.clear()               // 起動途中に紛れ込んだPCMは捨てる
+  micReady = true
+  render()                       // ここで「録音中」に変わる＝喋ってええ合図
 }
 
 async function stopRecordingAndTranscribe() {
+  micReady = false
   mode = 'confirm'
   transcribing = true
   confirmChoice = 0
@@ -335,6 +345,7 @@ async function stopRecordingAndTranscribe() {
 }
 
 function cancelRecording() {
+  micReady = false
   bridge.audioControl(false)
   recorder.clear()
   mode = 'view'

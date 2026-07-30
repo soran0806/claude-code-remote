@@ -33,6 +33,7 @@ interface Strings {
   quit: string
   // 録音
   recording: (sec: number) => string
+  micWarmup: string
   tapWhenDone: string
   transcribing: string
   notRecognized: string
@@ -87,6 +88,7 @@ const ja: Strings = {
   retake: '録り直し',
   quit: 'やめる',
   recording: s => `🎤 録音中 ${s}秒`,
+  micWarmup: 'マイク起動中…',
   tapWhenDone: '話し終わったらタップ',
   transcribing: '変換中…',
   notRecognized: '(認識できず)',
@@ -142,6 +144,7 @@ const en: Strings = {
   retake: 'Record again',
   quit: 'Discard',
   recording: s => `🎤 Recording ${s}s`,
+  micWarmup: 'Starting mic…',
   tapWhenDone: 'Tap when you finish',
   transcribing: 'Transcribing…',
   notRecognized: '(not recognized)',
@@ -197,6 +200,7 @@ const zh: Strings = {
   retake: '重新录音',
   quit: '放弃',
   recording: s => `🎤 录音中 ${s}秒`,
+  micWarmup: '麦克风启动中…',
   tapWhenDone: '说完后轻点',
   transcribing: '转写中…',
   notRecognized: '(无法识别)',
