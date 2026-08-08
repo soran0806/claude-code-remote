@@ -141,14 +141,18 @@ function footerText(): string {
 }
 
 // 状態表示（右下の独立コンテナ。ここだけ動くので凡例に影響しない）
+function clockText(): string {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 function statusText(): string {
-  if (notice) return notice
+  if (notice) return `${notice} ${clockText()}`
   const err = lastError ? ' ⚠' : ''
   if ((mode === 'view' || mode === 'menu') && current?.status === 'busy') {
-    return `${t.thinking}${err}`
+    return `${t.thinking}${err} ${clockText()}`
   }
   const st = current ? STATUS_ICON[current.status] ?? '' : ''
-  return `${st}${err}`
+  return `${st}${err} ${clockText()}`
 }
 
 // 右端の縦スクロールバー（8スロット、つまみの長さは表示割合に比例）
