@@ -24,3 +24,10 @@ icloud.py
 kuroko-monitor-qr.png
 
 # 接続情報の実体は ~/.even-terminal/kuroko.env（リポジトリ外）。
+
+# 実寸ラボの自動運用スクリプト一式。上と同じ理由（Evenのtoken・Telegramのbot token・
+# chat_id・自宅の絶対パスがべた書き）。2026-08-21: 未追跡なだけで ignore されておらず、
+# git add -A 1回で公開される状態やったので明示的に足した。
+jissun-*.ps1
+jissun-*.py
+jissun-*.pyw
