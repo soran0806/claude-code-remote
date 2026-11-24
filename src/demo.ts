@@ -24,7 +24,7 @@ const S: Record<'ja' | 'en' | 'zh', DemoStrings> = {
     reply: [
       'これはデモです。接続先を設定していなくても、アプリの操作をひと通り試せます。',
       '実際に使うときは、自分のPCで even-terminal を動かし、トンネルで外に出したURLを設定画面に入れてください。',
-      'ここに黒子（Claude Code）の応答がそのまま表示されます。長い応答は上下スワイプでスクロールできます。行が多いときは右端にスクロールバーが出ます。',
+      'ここに黒子（Claude Code）の応答がそのまま表示されます。長い応答は上下スワイプでスクロールでき、最下行の目盛りで今の位置が分かります。',
       '一覧に戻るにはダブルタップでメニューを開いてください。音声サーバーを設定していれば、タップで音声返信を録音できます。',
       `一覧の左のアイコンは状態を表します。${I.busy} が実行中、${I.idle} が待機、${I.awaiting} が承認待ちです。`,
     ].join('\n'),
@@ -38,7 +38,7 @@ const S: Record<'ja' | 'en' | 'zh', DemoStrings> = {
     reply: [
       'This is a demo. You can try every screen without configuring a connection.',
       'To use it for real, run even-terminal on your own PC, expose it through a tunnel, and paste that URL into the setup form.',
-      'Responses from Claude Code appear here in full. Swipe up or down to scroll long answers. A scrollbar shows up on the right when there is more than one screen of text.',
+      'Responses from Claude Code appear here in full. Swipe up or down to scroll long answers; the bar on the bottom line shows where you are.',
       'Double tap to open the menu and go back to the list. If you configured a speech-to-text server, a single tap starts a voice reply.',
       `The icon at the left of each row is the state: ${I.busy} running, ${I.idle} idle, ${I.awaiting} waiting for your approval.`,
     ].join('\n'),
@@ -52,7 +52,7 @@ const S: Record<'ja' | 'en' | 'zh', DemoStrings> = {
     reply: [
       '这是演示模式。即使没有配置连接，也可以体验全部界面。',
       '实际使用时，请在自己的电脑上运行 even-terminal，用隧道暴露后把网址填入设置表单。',
-      'Claude Code 的完整回复会显示在这里。上下滑动可以滚动较长的内容，超过一屏时右侧会出现滚动条。',
+      'Claude Code 的完整回复会显示在这里。上下滑动可以滚动较长的内容，底部一行的刻度条显示当前位置。',
       '双击打开菜单即可返回列表。如果配置了语音识别服务器，轻点一次就能开始语音回复。',
       `列表左侧的图标表示状态：${I.busy} 运行中，${I.idle} 空闲，${I.awaiting} 等待批准。`,
     ].join('\n'),
@@ -70,11 +70,11 @@ let permissionAnswered = false
 const extra: Record<string, HistoryEntry[]> = {}
 
 export function demoSessions(): Session[] {
-  const now = new Date().toISOString()
+  const ago = (min: number) => new Date(Date.now() - min * 60000).toISOString()
   return [
-    { id: 'demo-1', title: d.titles[0], timestamp: now, cwd: CWD, status: 'idle' },
-    { id: 'demo-2', title: d.titles[1], timestamp: now, cwd: CWD, status: permissionAnswered ? 'busy' : 'awaiting' },
-    { id: 'demo-3', title: d.titles[2], timestamp: now, cwd: CWD, status: 'busy' },
+    { id: 'demo-1', title: d.titles[0], timestamp: ago(130), cwd: CWD, status: 'idle' },
+    { id: 'demo-2', title: d.titles[1], timestamp: ago(3), cwd: CWD, status: permissionAnswered ? 'busy' : 'awaiting' },
+    { id: 'demo-3', title: d.titles[2], timestamp: ago(0), cwd: CWD, status: 'busy' },
   ]
 }
 

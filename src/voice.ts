@@ -49,13 +49,18 @@ export class Recorder {
 /** 注入は無理やが /api/prompt に流すとフォークする、という状態。呼び出し側は諦めること */
 export class ForkRisk extends Error {}
 
+// STT サーバは外からの要求にトークンを求める（3456 と同じトークン）
+const auth = (): Record<string, string> => (cfg.token ? { Authorization: `Bearer ${cfg.token}` } : {})
+
 export async function injectTerminal(sessionId: string, cwd: string, text: string): Promise<void> {
   const res = await fetch(`${cfg.sttBase}/inject`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...auth() },
     body: JSON.stringify({ sessionId, cwd, text }),
   })
   if (res.ok) return
+  // 401 で /api/prompt に流すと、稼働中のターミナルならフォークする。認証で弾かれた時は送らずに止める
+  if (res.status === 401) throw new ForkRisk('inject 401')
   const body = await res.json().catch(() => ({} as any))
   if (body?.fork_risk) throw new ForkRisk(body.error ?? `inject ${res.status}`)
   throw new Error(`inject ${res.status}`)
@@ -64,7 +69,7 @@ export async function injectTerminal(sessionId: string, cwd: string, text: strin
 export async function transcribe(pcm: Uint8Array, signal: AbortSignal): Promise<string> {
   const res = await fetch(`${cfg.sttBase}/transcribe`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/octet-stream' },
+    headers: { 'Content-Type': 'application/octet-stream', ...auth() },
     body: new Blob([pcm.buffer as ArrayBuffer]),
     signal,
   })

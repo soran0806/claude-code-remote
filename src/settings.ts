@@ -43,68 +43,55 @@ export function renderOnboardingGlasses(): string {
   return t.setupGlasses
 }
 
-const S = {
-  label: 'display:block;margin-bottom:14px;font-size:13px;color:#c9c9c9;',
-  input: 'width:100%;box-sizing:border-box;margin-top:5px;padding:9px;border-radius:6px;'
-       + 'border:1px solid #3E3E3E;background:#1c1c1c;color:#fff;font-size:15px;',
-  note: 'color:#919191;font-size:12px;margin-top:4px;',
-  card: 'background:#242424;border:1px solid #3E3E3E;border-radius:10px;padding:14px 16px;margin-bottom:20px;',
-  link: 'display:block;padding:10px 0;color:#8AE68A;font-size:13px;text-decoration:none;',
+// フォームは onboarding（全画面）と設定の窓（<dialog>）で共用する。見た目は phone.css
+type FormOpts = { full: boolean } // full=手順・デモ・つながらない時の案内まで出す（初回）
+
+function formHtml(o: FormOpts): string {
+  return `
+    ${o.full ? `
+      <h1>${t.setupTitle}</h1>
+      <p class="lead">${t.setupLead}</p>
+      <div class="card">
+        <b>${t.stepsTitle}</b>
+        <ol>${t.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+      </div>` : `<h2>${t.settings}</h2>`}
+    <label class="f">${t.fieldApi}
+      <input class="in" id="s-api" inputmode="url" autocapitalize="off" autocorrect="off"
+             placeholder="your-pc.tail1234.ts.net（https:// から入力）">
+    </label>
+    <label class="f">${t.fieldToken}
+      <input class="in" id="s-token" autocapitalize="off" autocorrect="off">
+    </label>
+    <label class="f">${t.fieldStt} (${t.optional})
+      <input class="in" id="s-stt" inputmode="url" autocapitalize="off" autocorrect="off"
+             placeholder="your-pc-stt.tail1234.ts.net（https:// から入力）">
+      <div class="note">${t.fieldSttNote}</div>
+    </label>
+    <button class="btn primary" id="s-save">${t.save}</button>
+    <p class="err" id="s-err" role="alert"></p>
+    ${o.full ? `
+      <button class="btn" id="s-demo">${t.tryDemo}</button>
+      <div class="note" style="margin-bottom:16px">${t.tryDemoNote}</div>
+      <div class="card">
+        <b>${t.helpTitle}</b>
+        <div class="note">${t.helpBody}</div>
+      </div>` : `<button class="btn" id="s-cancel" style="margin-top:8px">${t.cancel}</button>`}
+  `
 }
 
-export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
-  const app = document.querySelector<HTMLDivElement>('#app')!
-  app.innerHTML = `
-    <main style="margin:auto;padding:24px;max-width:460px;box-sizing:border-box;
-                 font:14px/1.6 -apple-system,system-ui,sans-serif;color:#E5E5E5;">
-      <h1 style="font-size:19px;margin:0 0 6px;">${t.setupTitle}</h1>
-      <p style="color:#919191;margin:0 0 20px;font-size:13px;">${t.setupLead}</p>
-
-      <div style="${S.card}">
-        <div style="font-weight:600;margin-bottom:8px;">${t.stepsTitle}</div>
-        <ol style="margin:0;padding-left:20px;color:#c9c9c9;font-size:13px;">
-          ${t.steps.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('')}
-        </ol>
-      </div>
-
-      <label style="${S.label}">${t.fieldApi}
-        <input id="s-api" inputmode="url" autocapitalize="off" autocorrect="off"
-               placeholder="your-pc.tail1234.ts.net（https://から入力）" style="${S.input}">
-      </label>
-      <label style="${S.label}">${t.fieldToken}
-        <input id="s-token" autocapitalize="off" autocorrect="off" style="${S.input}">
-      </label>
-      <label style="${S.label}">${t.fieldStt} <span style="color:#919191;">(${t.optional})</span>
-        <input id="s-stt" inputmode="url" autocapitalize="off" autocorrect="off"
-               placeholder="your-pc-stt.tail1234.ts.net（https://から入力）" style="${S.input}">
-        <div style="${S.note}">${t.fieldSttNote}</div>
-      </label>
-
-      <button id="s-save" style="width:100%;padding:12px;border-radius:8px;border:none;
-              background:#8AE68A;color:#111;font-weight:600;font-size:15px;">${t.save}</button>
-      <p id="s-err" style="color:#e68a8a;font-size:13px;margin-top:10px;min-height:1em;"></p>
-
-      <button id="s-demo" style="width:100%;padding:11px;border-radius:8px;background:transparent;
-              border:1px solid #3E3E3E;color:#E5E5E5;font-size:14px;">${t.tryDemo}</button>
-      <div style="${S.note}margin-bottom:20px;">${t.tryDemoNote}</div>
-
-      <div style="${S.card}">
-        <div style="font-weight:600;margin-bottom:6px;">${t.helpTitle}</div>
-        <div style="color:#c9c9c9;font-size:13px;">${t.helpBody}</div>
-      </div>
-
-      <a href="${LINK_FEEDBACK}" target="_blank" rel="noopener" style="${S.link}">${t.feedback}</a>
-      <a href="${LINK_DONATE}" target="_blank" rel="noopener" style="${S.link}">${t.donate}</a>
-    </main>
-  `
-
-  const val = (id: string) => (document.getElementById(id) as HTMLInputElement).value.trim().replace(/\/+$/, '')
-
-  document.getElementById('s-save')!.addEventListener('click', () => {
+function wireForm(root: ParentNode, bridge: Bridge, onDone: () => void, o: FormOpts): void {
+  const $ = (id: string) => root.querySelector<HTMLInputElement>('#' + id)!
+  const val = (id: string) => $(id).value.trim().replace(/\/+$/, '')
+  if (!o.full) { // 設定の窓は今の値を入れて開く（デモ中は空）
+    $('s-api').value = cfg.apiBase === DEMO_BASE ? '' : cfg.apiBase
+    $('s-token').value = cfg.apiBase === DEMO_BASE ? '' : cfg.token
+    $('s-stt').value = cfg.sttBase
+  }
+  $('s-save').addEventListener('click', () => {
     const apiBase = val('s-api')
-    const token = (document.getElementById('s-token') as HTMLInputElement).value.trim()
+    const token = $('s-token').value.trim()
     const sttBase = val('s-stt')
-    const err = document.getElementById('s-err')!
+    const err = $('s-err')
 
     if (!apiBase || !token) { err.textContent = t.errRequired; return }
     // 打ち間違い（スキーム無し等）だけ弾く。http:// は開発用サイドロードでは実際に動くので
@@ -116,9 +103,31 @@ export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
     err.textContent = ''
     saveSettings(bridge, { apiBase, token, sttBase }).then(onDone)
   })
-
   // サーバを持っていない人がそのまま全画面を触れるようにする（審査員もここを通る）
-  document.getElementById('s-demo')!.addEventListener('click', () => {
+  root.querySelector('#s-demo')?.addEventListener('click', () => {
     saveSettings(bridge, { apiBase: DEMO_BASE, token: DEMO_BASE, sttBase: '' }).then(onDone)
   })
+}
+
+export function mountOnboardingForm(bridge: Bridge, onDone: () => void): void {
+  const app = document.querySelector<HTMLDivElement>('#app')!
+  app.className = 'phone'
+  app.innerHTML = `<main class="form">${formHtml({ full: true })}
+    <div class="links"><a href="${LINK_FEEDBACK}" target="_blank" rel="noopener">${t.feedback}</a>
+    <a href="${LINK_DONATE}" target="_blank" rel="noopener">${t.donate}</a></div></main>`
+  wireForm(app, bridge, onDone, { full: true })
+}
+
+/** 設定の窓。保存したら閉じて onDone（呼び出し側が設定を読み直す） */
+export function openSettingsDialog(bridge: Bridge, onDone: () => void): void {
+  const app = document.querySelector<HTMLDivElement>('#app')!
+  const dlg = document.createElement('dialog')
+  dlg.className = 'modal'
+  dlg.setAttribute('aria-label', t.settings)
+  dlg.innerHTML = formHtml({ full: false })
+  app.appendChild(dlg)
+  dlg.addEventListener('close', () => dlg.remove())
+  wireForm(dlg, bridge, () => { dlg.close(); onDone() }, { full: false })
+  dlg.querySelector('#s-cancel')!.addEventListener('click', () => dlg.close())
+  dlg.showModal()
 }

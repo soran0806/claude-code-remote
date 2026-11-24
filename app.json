@@ -2,7 +2,7 @@
   "package_id": "com.soran.kurokomonitor",
   "edition": "202601",
   "name": "Claude Code Remote",
-  "version": "0.5.1",
+  "version": "0.7.1",
   "min_app_version": "2.0.0",
   "min_sdk_version": "0.0.12",
   "tagline": "グラスからPCのClaude Codeを監視・操作",

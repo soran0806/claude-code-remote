@@ -1,0 +1,95 @@
+/* スマホ画面（コンパニオン）。g2-epub-reader/src/phone/style.css と同じ見立て:
+   白い紙・墨・緑1色・角丸なし・ぼかさない「ずらし影」。外部リクエストなし（フォントは端末のもの）。 */
+.phone {
+  --ink: #161616; --mute: #666666; --rule: #D0D0D0; --paper: #FFFFFF;
+  --green: #15803D; --red: #B42318; --mint: #6FE382;
+  --sans: -apple-system, 'Hiragino Sans', 'Noto Sans JP', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+}
+body:has(#app.phone) { background: #FFFFFF; color: #161616; }
+#app.phone { display: block; height: 100dvh; font: 13px/1.6 var(--sans); letter-spacing: 0.03em; color: var(--ink); }
+.phone *, .phone *::before, .phone *::after { box-sizing: border-box; }
+.phone main { display: flex; flex-direction: column; height: 100%; max-width: 520px; margin: 0 auto; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); }
+.phone .top { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 2px solid var(--ink); }
+.phone h1 { margin: 0; min-width: 0; font-size: clamp(18px, 5.3vw, 24px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; line-height: 1.2; }
+.phone p { margin: 0; }
+.phone :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.phone .gear { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -12px; padding: 0; color: var(--mute); background: transparent; border: 0; cursor: pointer; }
+.phone .gear:active { color: var(--ink); background: #F4F4F4; }
+
+.phone .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; padding: 8px 16px; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); border-radius: 0; cursor: pointer; }
+.phone .btn:active { background: #EFEFEF; }
+.phone .btn.primary { color: var(--paper); background: var(--ink); font-weight: 500; letter-spacing: 0.06em; }
+.phone .btn.primary:active { background: #3A3A3A; }
+.phone .btn.danger { color: var(--red); border-color: var(--red); }
+.phone .btn.allow { background: var(--mint); font-weight: 500; }
+.phone .note { margin-top: 8px; font-size: 13px; color: var(--mute); }
+.phone .err { min-height: 1em; margin-top: 8px; font-size: 13px; color: var(--red); }
+.phone .card { margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--ink); }
+.phone .card ol { margin: 0; padding-left: 20px; color: var(--mute); }
+.phone .card li { margin-bottom: 6px; }
+
+/* 中身の領域。ここだけがスクロールし、フッタ（コーヒー）は常に見える */
+.phone .body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.phone .scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--ink); }
+.phone .empty { padding: 24px 14px; color: var(--mute); }
+
+/* セッション一覧 */
+.phone .sess { margin: 0; padding: 0; list-style: none; }
+.phone .sess li + li { border-top: 1px solid var(--rule); }
+.phone .srow { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 14px; font: inherit; letter-spacing: inherit; color: inherit; text-align: left; background: transparent; border: 0; border-left: 3px solid transparent; cursor: pointer; }
+.phone .srow:active { background: #F4F4F4; }
+.phone .srow .ti { flex: 1; min-width: 0; overflow: hidden; font-size: 16px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.phone .srow .ag { flex: none; font: 12px/1 var(--mono); color: var(--mute); }
+/* 状態: 緑の塗り=実行中／空の四角=待機／赤の塗り=承認待ち（色だけに頼らず aria-label にも言葉を入れる） */
+.phone .dot { flex: none; width: 12px; height: 12px; border: 2px solid var(--ink); }
+.phone .dot.busy { background: var(--green); border-color: var(--green); }
+.phone .dot.awaiting { background: var(--red); border-color: var(--red); }
+
+/* 会話 */
+.phone .tocbar { flex: none; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.phone .back { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px 0 8px; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); cursor: pointer; }
+.phone .back:active { background: #EFEFEF; }
+.phone .ctitle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; }
+.phone .ctitle span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phone .msgs { padding: 4px 0; }
+.phone .msg { padding: 10px 14px; font-size: 15px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.phone .msg + .msg { border-top: 1px solid var(--rule); }
+.phone .msg.u { color: var(--mute); border-left: 3px solid var(--ink); }
+.phone .think { flex: none; display: flex; align-items: center; gap: 6px; padding-top: 8px; color: var(--green); font-size: 13px; }
+.phone .think i { width: 6px; height: 6px; background: var(--green); }
+@media (prefers-reduced-motion: no-preference) {
+  .phone .think i { animation: tpulse 900ms cubic-bezier(.65,0,.35,1) infinite; }
+  .phone .think i:nth-child(2) { animation-delay: 120ms; }
+  .phone .think i:nth-child(3) { animation-delay: 240ms; }
+}
+@keyframes tpulse { 0%,60%,100% { transform: scale(.6); opacity: .35 } 30% { transform: scale(1); opacity: 1 } }
+
+/* 承認 */
+.phone .perm { flex: none; margin: 8px 5px 5px 0; padding: 12px 14px; background: var(--paper); border: 2px solid var(--red); box-shadow: 5px 5px 0 var(--red); }
+.phone .perm .ph { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; }
+.phone .perm .pd { margin-top: 4px; color: var(--mute); overflow-wrap: anywhere; }
+.phone .perm pre { max-height: 22dvh; margin: 8px 0 12px; padding: 8px 10px; overflow: auto; font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; background: #F4F4F4; border-left: 3px solid var(--ink); }
+.phone .perm .acts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.phone .perm .btn { padding: 8px 4px; font-size: 14px; }
+
+/* 設定の窓 */
+.phone dialog.modal { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 20px; overflow-y: auto; color: var(--ink); background: var(--paper); border: 2px solid var(--ink); border-radius: 0; box-shadow: 6px 6px 0 var(--ink); }
+.phone dialog.modal::backdrop { background: rgba(22, 22, 22, 0.5); }
+.phone label.f { display: block; margin-bottom: 14px; color: var(--mute); }
+.phone input.in { display: block; width: 100%; min-height: 44px; margin-top: 4px; padding: 8px 10px; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); border-radius: 0; }
+.phone .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.phone .lead { margin-bottom: 16px; color: var(--mute); }
+
+/* 一番下: コーヒー（大）とフィードバック。右と下の 5px はずらし影のぶん */
+.phone .cta { flex: none; display: flex; align-items: stretch; gap: 12px; margin: 16px 5px 5px 0; }
+.phone .fb { flex: none; display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 12px; font-size: 16px; font-weight: 500; color: var(--ink); text-decoration: none; white-space: nowrap; background: var(--paper); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+.phone .coffee { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; min-height: 64px; padding: 0 8px; text-align: center; font-size: clamp(16px, 4.8vw, 20px); font-weight: 500; color: var(--ink); text-decoration: none; background: var(--mint); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+.phone .fb:active, .phone .coffee:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .phone .coffee, .phone .fb { transition: transform 80ms, box-shadow 80ms; } }
+.phone .links a { display: flex; align-items: center; min-height: 44px; color: var(--ink); }
+.phone main.form { overflow-y: auto; display: block; }
+.phone h1 + .lead { margin-top: 8px; }
+.phone .think[hidden] { display: none; }
+.phone .scroll:focus-visible { outline-offset: -2px; }
