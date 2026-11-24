@@ -10,6 +10,7 @@
     "check:urls": "node scripts/check-urls.mjs",
     "pack": "node scripts/pack.mjs",
     "test": "vitest run --environment jsdom",
+    "test:bridge": "node --test bridge/test/bridge.test.mjs",
     "simulate": "evenhub-simulator http://localhost:5173"
   },
   "dependencies": {
