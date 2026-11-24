@@ -31,3 +31,7 @@ kuroko-monitor-qr.png
 jissun-*.ps1
 jissun-*.py
 jissun-*.pyw
+
+# STT番人。復旧用の運用スクリプトで、自宅の絶対パスがべた書きなので公開しない。
+stt/watchdog_stt.ps1
+stt/run-hidden-watchdog.vbs

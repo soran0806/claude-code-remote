@@ -38,12 +38,15 @@ interface Strings {
   transcribing: string
   notRecognized: string
   voiceOff: string
-  // 凡例
-  hintList: string
-  hintView: string
-  hintViewNoVoice: string
-  hintChoose: string
-  hintRecord: string
+  // 一覧の見出し・経過時間・スマホ側
+  sessionCount: (n: number) => string
+  age: { now: string; m: string; h: string; d: string }
+  idle: string
+  settings: string
+  coffee: string
+  feedbackShort: string
+  sessionsLabel: string
+  detail: string
   // オンボーディング（グラス側）
   setupGlasses: string
   // オンボーディング（スマホ側）
@@ -71,6 +74,14 @@ interface Strings {
 }
 
 const ja: Strings = {
+  sessionCount: n => `${n}件`,
+  age: { now: 'いま', m: '分', h: '時間', d: '日' },
+  idle: '待機',
+  settings: '設定',
+  coffee: 'コーヒーを奢る',
+  feedbackShort: '要望',
+  sessionsLabel: 'セッション',
+  detail: '詳細',
   loading: '(読込中)',
   empty: '(空)',
   noSessions: 'セッションなし',
@@ -93,11 +104,6 @@ const ja: Strings = {
   transcribing: '変換中…',
   notRecognized: '(認識できず)',
   voiceOff: '音声返信は未設定',
-  hintList: 'タップ:開く',
-  hintView: 'タップ:🎤返信',
-  hintViewNoVoice: '',
-  hintChoose: 'タップ:決定',
-  hintRecord: 'タップ:変換へ',
   setupGlasses: 'はじめに\n\nスマホ画面で接続設定を\n入力してください',
   setupTitle: 'Claude Code Remote 初期設定',
   setupLead: '自分のPCで動いているClaude Codeに接続します。まだ準備ができていない場合は、下の「使い方」を先に読んでください。',
@@ -127,6 +133,14 @@ const ja: Strings = {
 }
 
 const en: Strings = {
+  sessionCount: n => `${n} ${n === 1 ? 'session' : 'sessions'}`,
+  age: { now: 'now', m: 'm', h: 'h', d: 'd' },
+  idle: 'Idle',
+  settings: 'Settings',
+  coffee: 'Buy me a coffee',
+  feedbackShort: 'Feedback',
+  sessionsLabel: 'Sessions',
+  detail: 'Details',
   loading: '(loading)',
   empty: '(empty)',
   noSessions: 'No sessions',
@@ -149,11 +163,6 @@ const en: Strings = {
   transcribing: 'Transcribing…',
   notRecognized: '(not recognized)',
   voiceOff: 'Voice reply not set up',
-  hintList: 'Tap:open',
-  hintView: 'Tap:🎤reply',
-  hintViewNoVoice: '',
-  hintChoose: 'Tap:confirm',
-  hintRecord: 'Tap:transcribe',
   setupGlasses: 'Welcome\n\nFinish the setup\non your phone screen',
   setupTitle: 'Claude Code Remote - Setup',
   setupLead: 'Connects to Claude Code running on your own PC. If you have not set that up yet, read "How to set up" below first.',
@@ -183,6 +192,14 @@ const en: Strings = {
 }
 
 const zh: Strings = {
+  sessionCount: n => `${n}个`,
+  age: { now: '刚刚', m: '分', h: '时', d: '天' },
+  idle: '空闲',
+  settings: '设置',
+  coffee: '请我喝杯咖啡',
+  feedbackShort: '反馈',
+  sessionsLabel: '会话',
+  detail: '详情',
   loading: '(载入中)',
   empty: '(空)',
   noSessions: '没有会话',
@@ -205,11 +222,6 @@ const zh: Strings = {
   transcribing: '转写中…',
   notRecognized: '(无法识别)',
   voiceOff: '未设置语音回复',
-  hintList: '轻点:打开',
-  hintView: '轻点:🎤回复',
-  hintViewNoVoice: '',
-  hintChoose: '轻点:确定',
-  hintRecord: '轻点:转写',
   setupGlasses: '欢迎\n\n请在手机屏幕上\n完成连接设置',
   setupTitle: 'Claude Code Remote 初始设置',
   setupLead: '连接到你自己电脑上运行的 Claude Code。如果还没准备好，请先阅读下面的「使用方法」。',
